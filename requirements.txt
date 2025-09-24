@@ -1,0 +1,28 @@
+# YOLO-NAS Project Requirements
+# Core dependencies for running YOLO-NAS with SuperGradients
+
+# Deep Learning Framework
+torch>=1.13.0
+torchvision>=0.14.0
+
+# SuperGradients - YOLO-NAS implementation
+super-gradients>=3.4.0
+
+# Image processing
+Pillow>=9.0.0
+
+# Scientific computing
+numpy>=1.21.0
+
+# Progress bars and utilities
+tqdm>=4.64.0
+
+# Optional: For better performance on Apple Silicon
+# Uncomment if using M1/M2 Mac
+# torch-audio  # For MPS (Metal Performance Shaders) support
+
+# Development dependencies (optional)
+# Uncomment if doing development work
+# pytest>=7.0.0
+# black>=22.0.0
+# flake8>=4.0.0
