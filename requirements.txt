@@ -1,4 +1,5 @@
 # YOLO-NAS Project Requirements
+# Python 3.10+ required
 # Core dependencies for running YOLO-NAS with SuperGradients
 
 # Deep Learning Framework
