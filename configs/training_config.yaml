@@ -1,0 +1,73 @@
+# Training Configuration for YOLO-NAS
+# This file defines the training parameters for SuperGradients
+
+# Model settings
+model_name: "yolo_nas_s"  # Options: yolo_nas_s, yolo_nas_m, yolo_nas_l
+pretrained_weights: "coco"  # Use COCO pretrained weights
+
+# Training parameters
+max_epochs: 100
+batch_size: 16
+num_workers: 4
+
+# Learning rate settings
+initial_lr: 0.01
+lr_mode: "cosine"
+cosine_final_lr_ratio: 0.1
+warmup_epochs: 3
+warmup_initial_lr: 0.0001
+
+# Optimizer settings
+optimizer: "AdamW"
+optimizer_params:
+  weight_decay: 0.0001
+
+# Loss function
+loss: "yolo_nas_loss"
+
+# Metrics to track during training
+train_metrics_list:
+  - "accuracy"
+  - "precision"
+  - "recall"
+
+valid_metrics_list:
+  - "accuracy"
+  - "precision"
+  - "recall"
+  - "mAP@0.5"
+  - "mAP@0.5:0.95"
+
+# Monitoring settings
+metric_to_watch: "mAP@0.5"
+greater_metric_to_watch_is_better: true
+
+# Checkpoint settings
+save_ckpt_epoch_list: [50, 75, 100]
+ckpt_root_dir: "checkpoints"
+experiment_name: "yolo_nas_custom"
+
+# Logging settings
+log_instances: true
+log_images: false
+log_images_interval: 50
+
+# Validation settings
+run_validation_freq: 1
+valid_metrics_list:
+  - "mAP@0.5"
+  - "mAP@0.5:0.95"
+
+# Early stopping (optional)
+early_stop: false
+early_stop_patience: 10
+
+# Mixed precision training
+mixed_precision: true
+
+# Resume training
+resume: false
+resume_path: ""
+
+# Device settings
+device: "auto"  # Will automatically detect MPS (Apple Silicon) or CUDA
