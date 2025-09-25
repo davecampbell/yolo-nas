@@ -56,14 +56,32 @@ python smoke-test.py
 
 ### 3. Prepare Your Data
 
-#### Export from CVAT
+#### Option A: COCO Format (Recommended)
+
+1. In CVAT, go to your project
+2. Click "Actions" → "Export dataset"
+3. Choose **"COCO 1.0"** format
+4. Download the ZIP file
+
+```bash
+# Extract your CVAT COCO export
+unzip your_cvat_coco_export.zip
+
+# Organize into proper structure
+python scripts/organize_coco_export.py \
+    --input_dir your_cvat_coco_export \
+    --output_dir data \
+    --train_ratio 0.8 \
+    --val_ratio 0.1 \
+    --test_ratio 0.1
+```
+
+#### Option B: YOLO Format (Alternative)
 
 1. In CVAT, go to your project
 2. Click "Actions" → "Export dataset"
 3. Choose "CVAT 1.1" format
 4. Download the ZIP file
-
-#### Convert to YOLO Format
 
 ```bash
 # Extract your CVAT export
@@ -81,6 +99,20 @@ python scripts/convert_cvat_to_yolo.py \
 
 ### 4. Configure Your Classes
 
+#### For COCO Format:
+Edit `configs/coco_dataset_config.yaml`:
+
+```yaml
+classes:
+  - "person"
+  - "car"
+  - "bicycle"
+  # Add your actual class names here
+
+num_classes: 3  # Update to match your number of classes
+```
+
+#### For YOLO Format:
 Edit `configs/dataset_config.yaml`:
 
 ```yaml
@@ -95,6 +127,14 @@ num_classes: 3  # Update to match your number of classes
 
 ### 5. Train Your Model
 
+#### For COCO Format (Recommended):
+```bash
+python train_coco_yolo_nas.py \
+    --config configs/training_config.yaml \
+    --dataset_config configs/coco_dataset_config.yaml
+```
+
+#### For YOLO Format:
 ```bash
 python train_custom_yolo_nas.py \
     --config configs/training_config.yaml \

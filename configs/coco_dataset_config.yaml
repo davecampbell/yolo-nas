@@ -1,0 +1,49 @@
+# COCO Dataset Configuration for YOLO-NAS Training
+# This file defines the dataset parameters for SuperGradients using COCO format
+
+# Dataset paths - UPDATE THESE WITH YOUR ACTUAL PATHS
+data_dir: "data"                    # Root directory containing your COCO export
+train_images_dir: "images/train"    # Training images subdirectory
+val_images_dir: "images/val"        # Validation images subdirectory
+train_json_file: "annotations/instances_train.json"  # Training annotations JSON
+val_json_file: "annotations/instances_val.json"      # Validation annotations JSON
+
+# Class names - UPDATE THESE WITH YOUR ACTUAL CLASSES
+# You can extract these from your COCO JSON file
+classes:
+  - "person"      # Replace with your actual class names
+  - "car"         # These should match the categories in your COCO JSON
+  - "bicycle"     # Add more classes as needed
+
+# Number of classes (will be calculated automatically)
+num_classes: 3  # Update this to match your number of classes
+
+# Image settings
+input_dim: [640, 640]  # Input image size for training
+
+# COCO-specific settings
+json_annotation_file: "annotations/instances_train.json"  # Main annotation file
+all_classes_list: []  # Leave empty to auto-detect from JSON
+
+# Data augmentation settings
+mixup: 0.0
+copy_paste: 0.0
+mosaic: 1.0
+mosaic_prob: 1.0
+mixup_prob: 1.0
+mixup_alpha: 8.0
+degrees: 10.0
+translate: 0.1
+scale: [0.1, 2.0]
+shear: 2.0
+perspective: 0.0
+flip_ud: 0.0
+flip_lr: 0.5
+hsv_h: 0.015
+hsv_s: 0.7
+hsv_v: 0.4
+
+# Additional dataset settings
+cache_images: false
+cache_format: "ram"
+rect_training: false
