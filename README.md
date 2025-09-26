@@ -67,13 +67,22 @@ python smoke-test.py
 # Extract your CVAT COCO export
 unzip your_cvat_coco_export.zip
 
-# Organize into proper structure
+# Organize into proper structure (full dataset)
 python scripts/organize_coco_export.py \
     --input_dir your_cvat_coco_export \
     --output_dir data \
     --train_ratio 0.8 \
     --val_ratio 0.1 \
     --test_ratio 0.1
+
+# Or organize a subset (e.g., 100 images for testing)
+python scripts/organize_coco_export.py \
+    --input_dir your_cvat_coco_export \
+    --output_dir data \
+    --max_images 100 \
+    --train_ratio 0.8 \
+    --val_ratio 0.2 \
+    --test_ratio 0.0
 ```
 
 #### Option B: YOLO Format (Alternative)
@@ -142,6 +151,26 @@ python train_custom_yolo_nas.py \
 ```
 
 ## Configuration
+
+### Dataset Organization Script (`scripts/organize_coco_export.py`)
+
+**Key Parameters:**
+- **`--input_dir`**: Path to your CVAT COCO export directory
+- **`--output_dir`**: Where to create the organized dataset (usually `data/`)
+- **`--max_images`**: Limit dataset size (e.g., `100` for testing)
+- **`--train_ratio`**: Training set ratio (default: 0.8)
+- **`--val_ratio`**: Validation set ratio (default: 0.1)
+- **`--test_ratio`**: Test set ratio (default: 0.1)
+- **`--seed`**: Random seed for reproducible splits (default: 42)
+
+**Examples:**
+```bash
+# Full dataset with standard split
+--max_images 1000 --train_ratio 0.8 --val_ratio 0.1 --test_ratio 0.1
+
+# Small test dataset (no test split)
+--max_images 40 --train_ratio 0.8 --val_ratio 0.2 --test_ratio 0.0
+```
 
 ### Dataset Configuration (`configs/dataset_config.yaml`)
 
