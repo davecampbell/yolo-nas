@@ -23,7 +23,7 @@ def load_coco_json(json_path: Path) -> dict:
         return json.load(f)
 
 
-def split_coco_dataset(coco_data: dict, train_ratio: float, val_ratio: float, test_ratio: float) -> Tuple[List[int], List[int], List[int]]:
+def split_coco_dataset(coco_data: dict, train_ratio: float, val_ratio: float, test_ratio: float, max_images: int = None) -> Tuple[List[int], List[int], List[int]]:
     """
     Split COCO dataset into train/val/test sets based on image IDs.
     
@@ -39,6 +39,11 @@ def split_coco_dataset(coco_data: dict, train_ratio: float, val_ratio: float, te
     # Get all image IDs
     all_image_ids = [img['id'] for img in coco_data['images']]
     random.shuffle(all_image_ids)
+    
+    # Limit to max_images if specified
+    if max_images and max_images < len(all_image_ids):
+        all_image_ids = all_image_ids[:max_images]
+        print(f"Limited dataset to {max_images} images")
     
     # Calculate split indices
     total_images = len(all_image_ids)
@@ -82,7 +87,7 @@ def filter_coco_data(coco_data: dict, image_ids: List[int]) -> dict:
     return filtered_data
 
 
-def organize_coco_export(input_dir: Path, output_dir: Path, train_ratio: float, val_ratio: float, test_ratio: float):
+def organize_coco_export(input_dir: Path, output_dir: Path, train_ratio: float, val_ratio: float, test_ratio: float, max_images: int = None):
     """
     Organize COCO export from CVAT into train/val/test structure.
     
@@ -94,8 +99,8 @@ def organize_coco_export(input_dir: Path, output_dir: Path, train_ratio: float, 
         test_ratio: Test set ratio
     """
     
-    # Find the annotation JSON file
-    annotation_files = list(input_dir.glob('**/*.json'))
+    # Find the annotation JSON file (exclude hidden files)
+    annotation_files = [f for f in input_dir.glob('**/*.json') if not f.name.startswith('.')]
     if not annotation_files:
         raise FileNotFoundError("No JSON annotation file found in the input directory")
     
@@ -113,7 +118,7 @@ def organize_coco_export(input_dir: Path, output_dir: Path, train_ratio: float, 
     
     # Split dataset
     print("Splitting dataset...")
-    train_ids, val_ids, test_ids = split_coco_dataset(coco_data, train_ratio, val_ratio, test_ratio)
+    train_ids, val_ids, test_ids = split_coco_dataset(coco_data, train_ratio, val_ratio, test_ratio, max_images)
     
     print(f"Split: Train={len(train_ids)}, Val={len(val_ids)}, Test={len(test_ids)}")
     
@@ -124,10 +129,20 @@ def organize_coco_export(input_dir: Path, output_dir: Path, train_ratio: float, 
     
     # Find images directory in the export
     images_dir = None
+    
+    # First try to find images in subdirectories
     for subdir in input_dir.iterdir():
         if subdir.is_dir() and 'image' in subdir.name.lower():
-            images_dir = subdir
-            break
+            # Check if there are images in this subdirectory or its subdirectories
+            image_files = list(subdir.rglob('*.jpg')) + list(subdir.rglob('*.png')) + list(subdir.rglob('*.jpeg'))
+            if image_files:
+                # Find the deepest directory with images
+                deepest_dir = subdir
+                for img_file in image_files:
+                    if img_file.parent != subdir and img_file.parent.is_relative_to(subdir):
+                        deepest_dir = img_file.parent
+                images_dir = deepest_dir
+                break
     
     if not images_dir:
         # Look for images in the root directory
@@ -160,7 +175,11 @@ def organize_coco_export(input_dir: Path, output_dir: Path, train_ratio: float, 
             dst_path = split_images_dir / filename
             
             if src_path.exists():
-                shutil.copy2(src_path, dst_path)
+                try:
+                    shutil.copy2(src_path, dst_path)
+                except PermissionError:
+                    # Try without preserving metadata
+                    shutil.copy(src_path, dst_path)
             else:
                 print(f"Warning: Image not found: {src_path}")
         
@@ -191,7 +210,10 @@ def organize_coco_export(input_dir: Path, output_dir: Path, train_ratio: float, 
     print("Copying all images to main images directory...")
     for img_file in images_dir.glob('*'):
         if img_file.suffix.lower() in ['.jpg', '.jpeg', '.png']:
-            shutil.copy2(img_file, output_dir / 'images' / img_file.name)
+            try:
+                shutil.copy2(img_file, output_dir / 'images' / img_file.name)
+            except PermissionError:
+                shutil.copy(img_file, output_dir / 'images' / img_file.name)
     
     print("Organization completed!")
     print(f"Output structure:")
@@ -210,6 +232,7 @@ def main():
     parser.add_argument('--train_ratio', type=float, default=0.8, help='Training set ratio')
     parser.add_argument('--val_ratio', type=float, default=0.1, help='Validation set ratio')
     parser.add_argument('--test_ratio', type=float, default=0.1, help='Test set ratio')
+    parser.add_argument('--max_images', type=int, help='Maximum number of images to use (for subset)')
     parser.add_argument('--seed', type=int, default=42, help='Random seed for reproducible splits')
     
     args = parser.parse_args()
@@ -231,7 +254,7 @@ def main():
         raise FileNotFoundError(f"Input directory does not exist: {input_dir}")
     
     # Organize the export
-    organize_coco_export(input_dir, output_dir, args.train_ratio, args.val_ratio, args.test_ratio)
+    organize_coco_export(input_dir, output_dir, args.train_ratio, args.val_ratio, args.test_ratio, args.max_images)
 
 
 if __name__ == '__main__':

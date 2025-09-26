@@ -8,15 +8,14 @@ val_images_dir: "images/val"        # Validation images subdirectory
 train_json_file: "annotations/instances_train.json"  # Training annotations JSON
 val_json_file: "annotations/instances_val.json"      # Validation annotations JSON
 
-# Class names - UPDATE THESE WITH YOUR ACTUAL CLASSES
-# You can extract these from your COCO JSON file
+# Class names - extracted from COCO JSON file
 classes:
-  - "person"      # Replace with your actual class names
-  - "car"         # These should match the categories in your COCO JSON
-  - "bicycle"     # Add more classes as needed
+  - "box_low"
+  - "box_med"
+  - "box_high"
 
 # Number of classes (will be calculated automatically)
-num_classes: 3  # Update this to match your number of classes
+num_classes: 3
 
 # Image settings
 input_dim: [640, 640]  # Input image size for training
